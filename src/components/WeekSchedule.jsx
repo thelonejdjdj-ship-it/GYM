@@ -401,11 +401,6 @@ function WeekSchedule() {
     setExerciseWorkout,
   ] = useState(null)
 
-  const [
-    selectedDayKey,
-    setSelectedDayKey,
-  ] = useState(null)
-
   const today = new Date()
 
   const monday = getMonday(weekDate)
@@ -421,6 +416,23 @@ function WeekSchedule() {
 
       return date
     },
+  )
+
+  const todayKey = formatDateKey(today)
+
+  const isTodayInCurrentWeek =
+    weekDays.some(
+      (date) =>
+        formatDateKey(date) === todayKey,
+    )
+
+  const [
+    selectedDayKey,
+    setSelectedDayKey,
+  ] = useState(
+    isTodayInCurrentWeek
+      ? todayKey
+      : formatDateKey(monday),
   )
 
   const workoutMap = new Map()
@@ -469,8 +481,25 @@ function WeekSchedule() {
     },
   )
 
+  // ВАЖНО:
+  // При выборе дня теперь одновременно
+  // выбирается тренировка этого дня.
+  // Благодаря этому WorkoutDetails всегда
+  // получает правильную тренировку и её упражнения.
   const handleSelectDay = (dateKey) => {
     setSelectedDayKey(dateKey)
+
+    const selectedDay = weekSchedule.find(
+      (day) => day.dateKey === dateKey,
+    )
+
+    if (selectedDay?.workout) {
+      selectWorkout(
+        selectedDay.workout.id,
+      )
+    } else {
+      selectWorkout(null)
+    }
   }
 
   const goToPreviousWeek = () => {
@@ -483,10 +512,21 @@ function WeekSchedule() {
     setWeekDate(newDate)
 
     const newMonday = getMonday(newDate)
+    const newMondayKey =
+      formatDateKey(newMonday)
 
-    setSelectedDayKey(
-      formatDateKey(newMonday),
+    setSelectedDayKey(newMondayKey)
+
+    const mondayWorkout = workouts.find(
+      (workout) =>
+        workout.date === newMondayKey,
     )
+
+    if (mondayWorkout) {
+      selectWorkout(mondayWorkout.id)
+    } else {
+      selectWorkout(null)
+    }
   }
 
   const goToNextWeek = () => {
@@ -499,10 +539,21 @@ function WeekSchedule() {
     setWeekDate(newDate)
 
     const newMonday = getMonday(newDate)
+    const newMondayKey =
+      formatDateKey(newMonday)
 
-    setSelectedDayKey(
-      formatDateKey(newMonday),
+    setSelectedDayKey(newMondayKey)
+
+    const mondayWorkout = workouts.find(
+      (workout) =>
+        workout.date === newMondayKey,
     )
+
+    if (mondayWorkout) {
+      selectWorkout(mondayWorkout.id)
+    } else {
+      selectWorkout(null)
+    }
   }
 
   const handleOpenExerciseModal = (
